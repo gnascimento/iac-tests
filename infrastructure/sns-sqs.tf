@@ -1,9 +1,9 @@
 resource "aws_sns_topic" "batch_request_sns" {
-  name = "sns-batch-request"
+  name = var.sns_batch_request_topic
 }
 
 resource "aws_sqs_queue" "sqs_batch_request_queue" {
-  name = "sqs-batch-request"
+  name = var.sns_batch_request_queue
 }
 
 resource "aws_sns_topic_subscription" "sns_to_sqs_request" {
@@ -11,5 +11,3 @@ resource "aws_sns_topic_subscription" "sns_to_sqs_request" {
   protocol  = "sqs"
   endpoint  = aws_sqs_queue.sqs_batch_request_queue.arn
 }
-
-

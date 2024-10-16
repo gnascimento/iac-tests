@@ -16,7 +16,7 @@ resource "aws_iam_policy" "sqs_read_policy" {
           "sqs:GetQueueAttributes",
           "sqs:GetQueueUrl"
         ],
-        "Resource": "arn:aws:sqs:${var.aws_region}:${var.aws_account_id}:${aws_sqs_queue.sqs_batch_request_queue.name}"
+        "Resource": data.aws_sqs_queue.sqs_batch_request_queue_info.arn
       }
     ]
   })
@@ -173,7 +173,6 @@ resource "aws_iam_role" "lambda_request_role" {
     Name = "lambda-request-role"
   }
 }
-
 
 
 resource "aws_iam_role_policy_attachment" "attach_s3_policy_to_lambda_request_role" {

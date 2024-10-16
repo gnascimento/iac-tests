@@ -7,11 +7,12 @@ resource "aws_lambda_function" "lambda_reports" {
   runtime       = "python3.8"
   role          = aws_iam_role.lambda_report_role.arn
   
-   environment {
-     variables = {
-       S3_REPORT_BUCKET = aws_s3_bucket.reports_bucket.bucket
-     }
-   }
+  environment {
+    variables = {
+      S3_REPORT_BUCKET = aws_s3_bucket.reports_bucket.bucket
+      PRODUCTS_TABLE = aws_dynamodb_table.product_table.name
+    }
+  }
 
   # Attach the Lambda function to the VPC and subnets
   vpc_config {
@@ -20,6 +21,14 @@ resource "aws_lambda_function" "lambda_reports" {
   }
 }
 
+
+# Configure trigger SQS to Lambda Function
+resource "aws_lambda_event_source_mapping" "lambda_sqs_trigger" {
+  event_source_arn = aws_sqs_queue.sqs_batch_request_queue.arn
+  function_name    = aws_lambda_function.lambda_reports.arn
+  batch_size       = 5 # Number of messages that the lambda can process at once
+  depends_on = [ aws_sqs_queue.sqs_batch_request_queue, aws_lambda_function.lambda_reports ]
+}
 
 
 resource "aws_lambda_function" "lambda_request" {
@@ -31,10 +40,10 @@ resource "aws_lambda_function" "lambda_request" {
   role          = aws_iam_role.lambda_request_role.arn
 
   environment {
-     variables = {
-       S3_REPORT_BUCKET = aws_s3_bucket.reports_bucket.bucket
-     }
-   }
+    variables = {
+      SNS_TOPIC_ARN = data.aws_sns_topic.sns_batch_request_topic_info.arn
+    }
+  }
   
   # Attach the Lambda function to the VPC and subnets
   vpc_config {

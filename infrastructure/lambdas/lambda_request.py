@@ -1,18 +1,49 @@
 import json
 import logging
+import os
+import boto3
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
+# Initialize the SNS client
+sns_client = boto3.client('sns')
+
 def lambda_handler(event, context):
+
+     # Fetch the SNS topic ARN from environment variables
+    sns_topic_arn = os.environ['SNS_TOPIC_ARN']
+
+    product_id = event['product_id']
+    amount = event['amount']
     
-    # runtime converts the event object to a Python dictionary
-    a = event['a']
-    b = event['b']
-    
-    sum = a + b
-    print(f"The sum is {sum}")
+    amount_request = {
+        'product_id': product_id,
+        'amount': amount
+    }
         
-    # return the calculated sum as a JSON string
-    data = {"sum": sum}
-    return json.dumps(data)
+    logger.info(f"Request: product: {amount_request['product_id']}, amount: {amount_request['amount']}")
+    
+     
+    # Send the message to the SNS topic
+    try:
+        response = sns_client.publish(
+            TopicArn=sns_topic_arn,
+            Message=json.dumps(amount_request),
+            Subject='Lambda SNS Message'
+        )
+        return {
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': 'Message sent successfully!',
+                'response': response
+            })
+        }
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps({
+                'error': str(e)
+            })
+        }
