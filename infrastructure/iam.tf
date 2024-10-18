@@ -24,6 +24,7 @@ resource "aws_iam_policy" "sqs_read_policy" {
 
 
 resource "aws_iam_policy" "dynamodb_access_policy" {
+  count = var.aws_profile == "localstack"? 0 : 1
   name        = "DynamoDBSubnetAccessPolicy"
   description = "Policy to allow access to DynamoDB only from the specific application subnet"
   depends_on = [  aws_vpc_endpoint.dynamodb_endpoint ]
@@ -42,7 +43,7 @@ resource "aws_iam_policy" "dynamodb_access_policy" {
         "Resource": "arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${aws_dynamodb_table.product_table.name}",
         "Condition": {
           "StringEquals": {
-            "aws:SourceVpce": "${aws_vpc_endpoint.dynamodb_endpoint.id}"
+            "aws:SourceVpce": "${aws_vpc_endpoint.dynamodb_endpoint[count.index].id}"
           }
         }
       }
@@ -82,8 +83,9 @@ resource "aws_iam_role_policy_attachment" "attach_sqs_to_lambda_report_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "attach_dynamodb_policy_to_lambda_report_role" {
+  count = var.aws_profile == "localstack"? 0 : 1
   role       = aws_iam_role.lambda_report_role.name
-  policy_arn = aws_iam_policy.dynamodb_access_policy.arn
+  policy_arn = aws_iam_policy.dynamodb_access_policy[0].arn
 }
 
 

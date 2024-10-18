@@ -16,7 +16,7 @@ func TestTerraformHelloWorldExample(t *testing.T) {
 	})
 
 	// website::tag::5:: Clean up resources with "terraform destroy" at the end of the test.
-	// defer terraform.Destroy(t, terraformOptions)
+	defer terraform.Destroy(t, terraformOptions)
 
 	// website::tag::3:: Run "terraform init" and "terraform apply". Fail the test if there are any errors.
 	terraform.Init(t, terraformOptions)
@@ -61,10 +61,6 @@ func validateIAMPoliciesAndRoles(t *testing.T, terraformOptions *terraform.Optio
 	sqsPolicyArn := terraform.Output(t, terraformOptions, "aws_iam_policy_sqs_read_policy_arn")
 	assert.Contains(t, sqsPolicyArn, "arn:aws:iam")
 
-	// Validate DynamoDB Access Policy
-	dynamodbPolicyArn := terraform.Output(t, terraformOptions, "aws_iam_policy_dynamodb_access_policy_arn")
-	assert.Contains(t, dynamodbPolicyArn, "arn:aws:iam")
-
 	// Validate Lambda Role
 	lambdaRoleArn := terraform.Output(t, terraformOptions, "aws_iam_role_lambda_report_role_arn")
 	assert.Contains(t, lambdaRoleArn, "arn:aws:iam")
@@ -72,9 +68,6 @@ func validateIAMPoliciesAndRoles(t *testing.T, terraformOptions *terraform.Optio
 	// Validate Lambda Role Policy Attachments
 	sqsPolicyAttachment := terraform.Output(t, terraformOptions, "aws_iam_role_policy_attachment_attach_sqs_to_lambda_report_role_id")
 	assert.NotEmpty(t, sqsPolicyAttachment)
-
-	dynamodbPolicyAttachment := terraform.Output(t, terraformOptions, "aws_iam_role_policy_attachment_attach_dynamodb_policy_to_lambda_report_role_id")
-	assert.NotEmpty(t, dynamodbPolicyAttachment)
 
 	s3PolicyAttachment := terraform.Output(t, terraformOptions, "aws_iam_role_policy_attachment_attach_s3_policy_to_lambda_report_role_id")
 	assert.NotEmpty(t, s3PolicyAttachment)

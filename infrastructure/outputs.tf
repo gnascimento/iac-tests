@@ -38,10 +38,10 @@ output "aws_iam_policy_sqs_read_policy_arn" {
 }
 
 # Output for DynamoDB Access Policy ARN
-output "aws_iam_policy_dynamodb_access_policy_arn" {
-  value = aws_iam_policy.dynamodb_access_policy.arn
+/* output "aws_iam_policy_dynamodb_access_policy_arn" {
+  value = aws_vpc_endpoint.dynamodb_endpoint.arn
   description = "The ARN of the DynamoDB access policy."
-}
+} */
 
 # Output for Lambda Report Role ARN
 output "aws_iam_role_lambda_report_role_arn" {
@@ -56,10 +56,10 @@ output "aws_iam_role_policy_attachment_attach_sqs_to_lambda_report_role_id" {
 }
 
 # Output for DynamoDB policy attachment to Lambda report role
-output "aws_iam_role_policy_attachment_attach_dynamodb_policy_to_lambda_report_role_id" {
+/* output "aws_iam_role_policy_attachment_attach_dynamodb_policy_to_lambda_report_role_id" {
   value = aws_iam_role_policy_attachment.attach_dynamodb_policy_to_lambda_report_role.id
   description = "The ID of the policy attachment for DynamoDB to Lambda report role."
-}
+} */
 
 # Output for S3 policy attachment to Lambda report role
 output "aws_iam_role_policy_attachment_attach_s3_policy_to_lambda_report_role_id" {

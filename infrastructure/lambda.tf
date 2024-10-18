@@ -47,10 +47,10 @@ resource "aws_lambda_function" "lambda_request" {
 }
 
 
-/* # Configure trigger SQS to Lambda Function
+# Configure trigger SQS to Lambda Function
 resource "aws_lambda_event_source_mapping" "lambda_report_sqs_trigger" {
+    count = var.aws_profile == "localstack"? 0 : 1 # Having issues with localstack
     event_source_arn = data.aws_sqs_queue.sqs_batch_request_queue_info.arn
     function_name    = data.aws_lambda_function.lambda_reports.arn
     batch_size       = 5 # Number of messages that the lambda can process at once
 }
- */

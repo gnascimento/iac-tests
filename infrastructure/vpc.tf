@@ -10,6 +10,7 @@ resource "aws_subnet" "application_subnet" {
 
 
 resource "aws_vpc_endpoint" "dynamodb_endpoint" {
+  count = var.aws_profile == "localstack"? 0 : 1
   vpc_id       = aws_vpc.demo_vpc.id
   service_name = "com.amazonaws.${var.aws_region}.dynamodb"
   vpc_endpoint_type = "Gateway"  # Explicitly setting the type to Gateway
