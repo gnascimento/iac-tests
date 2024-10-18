@@ -26,6 +26,7 @@ resource "aws_iam_policy" "sqs_read_policy" {
 resource "aws_iam_policy" "dynamodb_access_policy" {
   name        = "DynamoDBSubnetAccessPolicy"
   description = "Policy to allow access to DynamoDB only from the specific application subnet"
+  depends_on = [  aws_vpc_endpoint.dynamodb_endpoint ]
 
   policy = jsonencode({
     "Version": "2012-10-17",
@@ -38,7 +39,7 @@ resource "aws_iam_policy" "dynamodb_access_policy" {
           "dynamodb:UpdateItem",
           "dynamodb:DeleteItem"
         ],
-        "Resource": "arn:aws:dynamodb:${var.aws_region}:${var.aws_account_id}:table/${aws_dynamodb_table.product_table.name}",
+        "Resource": "arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${aws_dynamodb_table.product_table.name}",
         "Condition": {
           "StringEquals": {
             "aws:SourceVpce": "${aws_vpc_endpoint.dynamodb_endpoint.id}"
@@ -91,6 +92,11 @@ resource "aws_iam_role_policy_attachment" "attach_s3_policy_to_lambda_report_rol
   policy_arn = aws_iam_policy.lambda_s3_access_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "attach_vpc_access_lambda_reports" {
+    role       = aws_iam_role.lambda_report_role.name
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
 resource "aws_iam_role" "lambda_report_role" {
   name = "lambda-report-role"
 
@@ -124,7 +130,7 @@ resource "aws_iam_policy" "sns_publish_policy" {
       {
         "Effect": "Allow",
         "Action": "sns:Publish",
-        "Resource": "arn:aws:sns:${var.aws_region}:${var.aws_account_id}:${aws_sns_topic.batch_request_sns.name}"
+        "Resource": "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${aws_sns_topic.batch_request_sns.name}"
       }
     ]
   })
@@ -185,6 +191,11 @@ resource "aws_iam_role_policy_attachment" "attach_sns_policy_to_lambda_request_r
   policy_arn = aws_iam_policy.sns_publish_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "attach_vpc_access_lambda_request" {
+    role       = aws_iam_role.lambda_request_role.name
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
 ### Allows SNS to publish to SQS queue
 
 resource "aws_sqs_queue_policy" "sqs_queue_policy" {
@@ -199,10 +210,10 @@ resource "aws_sqs_queue_policy" "sqs_queue_policy" {
           "Service": "sns.amazonaws.com"
         },
         "Action": "sqs:SendMessage",
-        "Resource": "arn:aws:sqs:${var.aws_region}:${var.aws_account_id}:${aws_sqs_queue.sqs_batch_request_queue.name}",
+        "Resource": "arn:aws:sqs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${aws_sqs_queue.sqs_batch_request_queue.name}",
         "Condition": {
           "ArnEquals": {
-            "aws:SourceArn": "arn:aws:sns:${var.aws_region}:${var.aws_account_id}:${aws_sns_topic.batch_request_sns.name}"
+            "aws:SourceArn": "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${aws_sns_topic.batch_request_sns.name}"
           }
         }
       }

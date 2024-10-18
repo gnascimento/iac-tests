@@ -10,11 +10,6 @@ variable "aws_region" {
     description = "AWS Region"
 }
 
-variable "aws_account_id" {
-    type = string
-    default = "000000000000"
-    description = "AWS Account"
-}
 
 variable "sns_batch_request_topic" {
   type = string
@@ -26,4 +21,10 @@ variable "sns_batch_request_queue" {
   type = string
   default = "sqs-batch-request-queue"
   description = "SNS batch request queue"
+}
+
+variable "lambda_reports" {
+  type = string
+  default = "lambda-reports"
+  description = "Lambda reports name"
 }

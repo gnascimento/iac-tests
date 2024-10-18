@@ -1,6 +1,6 @@
 
 resource "aws_lambda_function" "lambda_reports" {
-  function_name = "lambda-reports"
+  function_name = var.lambda_reports
   s3_bucket     = aws_s3_bucket.lambda_bucket.id
   s3_key        = "lambdas/lambda_reports.zip"
   handler       = "lambda_reports.lambda_handler"
@@ -19,17 +19,11 @@ resource "aws_lambda_function" "lambda_reports" {
     subnet_ids         = [aws_subnet.application_subnet.id]   # app_subnet
     security_group_ids = [aws_security_group.lambda_sg.id]    # Security group for Lambda
   }
+
+  tags = {
+    Name = "lambda-reports"
+  }
 }
-
-
-# Configure trigger SQS to Lambda Function
-resource "aws_lambda_event_source_mapping" "lambda_sqs_trigger" {
-  event_source_arn = aws_sqs_queue.sqs_batch_request_queue.arn
-  function_name    = aws_lambda_function.lambda_reports.arn
-  batch_size       = 5 # Number of messages that the lambda can process at once
-  depends_on = [ aws_sqs_queue.sqs_batch_request_queue, aws_lambda_function.lambda_reports ]
-}
-
 
 resource "aws_lambda_function" "lambda_request" {
   function_name = "lambda-request"
@@ -51,3 +45,12 @@ resource "aws_lambda_function" "lambda_request" {
     security_group_ids = [aws_security_group.lambda_sg.id]    # Security group for Lambda
   }
 }
+
+
+/* # Configure trigger SQS to Lambda Function
+resource "aws_lambda_event_source_mapping" "lambda_report_sqs_trigger" {
+    event_source_arn = data.aws_sqs_queue.sqs_batch_request_queue_info.arn
+    function_name    = data.aws_lambda_function.lambda_reports.arn
+    batch_size       = 5 # Number of messages that the lambda can process at once
+}
+ */
