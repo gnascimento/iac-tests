@@ -110,9 +110,3 @@ func validateLambdaRequest(t *testing.T, terraformOptions *terraform.Options) {
 	assert.Contains(t, lambdaRequestRole, "arn:aws:iam")
 
 }
-
-func validateSqsToLambdaTrigger(t *testing.T, terraformOptions *terraform.Options) {
-	// Validate SQS trigger for Lambda
-	lambdaReportSqsTrigger := terraform.Output(t, terraformOptions, "aws_lambda_event_source_mapping_lambda_report_sqs_trigger_id")
-	assert.NotEmpty(t, lambdaReportSqsTrigger)
-}
